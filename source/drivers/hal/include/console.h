@@ -1,76 +1,111 @@
-/**
-*   See the readme.txt at the root directory of this project for the idea and originality of this operating system.
-*   See the license.txt at the root directory of this project for the copyright information about this file and project.
-*
-*   LuYan
-*   HAL Console
-*/
+/*
+	Copyright (C) 2012-2014, GridOS Developing Team
+	All Rights Reserved.
 
-#ifndef HAL_CONSOLE_H
-#define HAL_CONSOLE_H
+	Developers: 
+	-> LuYan
+	-> Mighten. Dai.( mingchen97@163.com)
+	-> Wuj (921954642@qq.com)	
+	
+	Moudkle File location: /source/drivers/hal/include/console.h
+	Module        Version: 2.1
+	Module    Description:
+						HAL Console
+						
+						Print the debug message from printk.
+						
+						This file offer the necessary structure.
+*/
+#ifndef INCLUDE_HAL_CONSOLE_H___
+#define INCLUDE_HAL_CONSOLE_H___
+
 
 #include <ddk/compatible.h>
 #include <screen.h>
 
-/* 循环缓存,暂存当前屏幕输出数据 */
-#define CONSOLE_BUFFER_SIZE 4 * 1024
-struct hal_console_buffer
+
+#define          CONSOLE_BUFFER_SIZE           5 * 1024   // Buffer size.
+
+#define DOTFNT_CHAR_SPACE_LEN		6		// pixel length for " "
+#define DOTFNT_CHAR_LINE_HEIGHT		15		// pixel count of the HEIGHT of a line
+#define DOTFNT_CHAR_WIDTH	    	16		// used to judge it is necessary for next-line drawing or not.
+
+#define CONSOLE_SCREEN_DEFAULT_RESOLUTION_X		1024
+#define CONSOLE_SCREEN_DEFAULT_RESOLUTION_Y		768
+
+// Pixels.
+#define WHITE_PIX 0xffffffff
+#define BLACK_PIX 0
+
+////////////////////////////////////////////////////////////////////
+struct   console_descriptor  // @ {
 {
-	/*                              |<----------|                               */
-	/* [pre_line_idx][next_line_idx]text1"\n"[pre_line][next_line_idx]text2"\n" */
-	/*                |----------------------------------------------->|        */
-	unsigned char buf[CONSOLE_BUFFER_SIZE];
+	// Buffer
+	char  buffer[CONSOLE_BUFFER_SIZE];
+	
+	// Variables #1
+	// Drawing Color.
+	unsigned int  m_drawing_color;
+	
+	// Variables #2
+	// the screen buffer pointers.
+	unsigned char *m_buffer_begin;
+	unsigned char *m_buffer_current;
+	unsigned char *m_buffer_end;
 
-	/* 第一行有效行首字符下标 */
-	unsigned int  topline;
+	// Variables #3
+	//  Point to the area display on the screen.
+	unsigned char *m_screen_begin;
+	unsigned char *m_screen_current;        // replace '\0' with cursor
+	unsigned char *m_screen_end;
 
-	/* 最后一个字符的下标 */
-	unsigned int lastchar;
+	// Variables #4
+	// the screen cursor's current position.
+	unsigned int  m_cursor_position_x;      // this->m_screen_current
+	unsigned int  m_cursor_position_y;      // this->m_screen_current
+	unsigned int  m_cursor_position_max_x;  // the limited position x of cursor.
+	unsigned int  m_cursor_position_max_y;  // the limited position y of cursor.
 
-	/* 缓存中目前没有显示输入\n的行首下标 */
-	unsigned int tail_line;
-};
+	// Variables #5
+	// screen's resolution.
+	unsigned int  m_screen_resolution_x;
+	unsigned int  m_screen_resolution_y;
 
-/* 显示，描述当前正在显示的“窗口” */
-struct hal_console_window
+	// Variables #6
+	// Provided for BAXI keyboard framework.
+//	bool          m_BAXI_input_enable;
+//	unsigned int  m_BAXI_input_screen_begin_x;
+//	unsigned int  m_BAXI_input_screen_begin_y;
+//	unsigned int  m_BAXI_input_screen_end_x;
+//	unsigned int  m_BAXI_input_screen_end_y;
+//	char         *m_BAXI_input_buffer_begin;
+//	char         *m_BAXI_input_buffer_end;
+
+	// Variables #7
+	// Steps of screen rolling.
+	unsigned char *m_current_screen_first_one;
+	unsigned char *m_current_screen_second_line_head;
+	unsigned char *m_current_screen_last_one;
+	
+	unsigned int  m_steps_can_upward;
+
+};   // struct   console_descriptor @ }
+
+////////////////////////////////////////////////////////////////////
+struct hal_console_ops // @ {
 {
-	/* 当前屏幕上第一个字符所属用户输入“行”的首字符下标 */
-	unsigned int  topline;	
-
-	/* 当前窗口最后一个字符的下标 */
-	unsigned int  lastchar;	
-
-	unsigned int pos_x;
-	unsigned int pos_y;	
-
-	/* 0:窗口处于缓存的底部，1:窗口处于回滚状态 */
-	unsigned int downward;
-	/* 记录当前状态下，屏幕上滚时，新的首行在缓存中的位置，step[0]为单行滚动，step[1]为PGDN */
-	int step[2];
-};
-
-struct hal_console_context
-{
-	int max_x, max_y;	/* 分辨率 */
-	struct hal_console_window window;
-	struct hal_console_buffer buffer;	
-	unsigned int color;
-	spinlock_t lock;
-};
-
-
-struct hal_console_ops
-{
-	int (*read)(char *buffer, int size);
+	int (*read) (char *buffer, int size);
 	int (*write)(char *buffer, int size);
-};
-static inline void get_screen_resolution(int *w, int *h, int *bpp)
-{
-	*w = main_screen.width;
-	*h = main_screen.height;
-}
+}; // struct hal_console_ops // @ }
 
-void console_write(char *string, int size);
-void hal_console_init(void);
+////////////////////////////////////////////////////////////////////
+// the previous calling hierarchy of   i686_write_string [ directly invoked by pointers array ]
+void     console_write(char *string, int size);
 
-#endif
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HAL Console Initiator,  
+//     NOTE: This function is invoked before running GridOS !!!
+void     hal_console_init( void );
+
+
+#endif  // #ifndef INCLUDE_HAL_CONSOLE_H___

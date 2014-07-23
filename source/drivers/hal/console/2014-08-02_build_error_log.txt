@@ -1,0 +1,30 @@
+make[3]: Entering directory `/d/gridos/source/drivers/hal/console'
+
+gcc -I/d/gridos/source/drivers/hal/include-I/d/gridos/source/drivers/hal/include/arch/x86-I/d/gridos/soure/drivers/hal/include/arch/  -I/d/gridos/source/libs/common/include -I/d/gridos/source/libs/common/include/arch/x86 -include hal_config.h -include hal_config.h -I../../../../include -o  console.o console_c_interface.h console_internal.c
+
+console_internal.c:171:10: warning: conflicting types for 'm_down_ward_screen' [enabled by default]
+console_internal.c:162:3: note: previous implicit declaration of 'm_down_ward_screen' was here
+console_internal.c:260:16: warning: conflicting types for 'm_zero_fill_buffer' [enabled by default]
+console_internal.c:218:2: note: previous implicit declaration of 'm_zero_fill_buffer' was here
+console_internal.c:274:12: warning: conflicting types for 'm_get_second_line_head_in_buffer' [enabled by default]
+console_internal.c:68:4: note: previous implicit declaration of 'm_get_second_line_head_in_buffer' was here
+ld: cannot find crt2.o: No such file or directory
+ld: cannot find crtbegin.o: No such file or directory
+ld: cannot find -lmingw32
+ld: cannot find -lgcc
+ld: cannot find -lmoldname
+ld: cannot find -lmingwex
+ld: cannot find -lmsvcrt
+ld: cannot find -luser32
+ld: cannot find -lkernel32
+ld: cannot find -ladvapi32
+ld: cannot find -lshell32
+ld: cannot find -lmingw32
+ld: cannot find -lgcc
+ld: cannot find -lmoldname
+ld: cannot find -lmingwex
+ld: cannot find -lmsvcrt
+ld: cannot find crtend.o: No such file or directory
+make[3]: *** [console.o] Error 1
+make[3]: Leaving directory `/d/gridos/source/drivers/hal/console'
+make[2]: *** [subs_parts] Error 2
